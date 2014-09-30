@@ -5,6 +5,7 @@
 // Get the RFM69 and SPIFlash library at: https://github.com/LowPowerLab/
 
 #include <RFM69.h>
+#include <SPI.h>
 
 #define NODEID        1    //unique for each node on same network
 #define NETWORKID     100  //the same on all nodes that talk to each other
@@ -44,30 +45,34 @@ void loop() {
 
     Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
 
-    if (radio.ACKRequested())
-    {
-      byte theNodeID = radio.SENDERID;
-      radio.sendACK();
-      Serial.print(" - ACK sent.");
-
-      // When a node requests an ACK, respond to the ACK
-      // and also send a packet requesting an ACK (every 3rd one only)
-      // This way both TX/RX NODE functions are tested on 1 end at the GATEWAY
-      if (ackCount++%3==0)
-      {
-        Serial.print(" Pinging node ");
-        Serial.print(theNodeID);
-        Serial.print(" - ACK...");
-        delay(3); //need this when sending right after reception .. ?
-        if (radio.sendWithRetry(theNodeID, "ACK TEST", 8, 0)) {  // 0 = only 1 attempt, no retries
-          Serial.print("ok!");
-        } else {
-          Serial.print("nothing");
-        }
-      }
-    }
+    ExchangeAck();
     Serial.println();
     Blink(LED,3);
+  }
+}
+
+void ExchangeAck() {
+  if (radio.ACKRequested())
+  {
+    byte theNodeID = radio.SENDERID;
+    radio.sendACK();
+    Serial.print(" - ACK sent.");
+
+    // When a node requests an ACK, respond to the ACK
+    // and also send a packet requesting an ACK (every 3rd one only)
+    // This way both TX/RX NODE functions are tested on 1 end at the GATEWAY
+    if (ackCount++%3==0)
+    {
+      Serial.print(" Pinging node ");
+      Serial.print(theNodeID);
+      Serial.print(" - ACK...");
+      delay(3); //need this when sending right after reception .. ?
+      if (radio.sendWithRetry(theNodeID, "ACK TEST", 8, 0)) {  // 0 = only 1 attempt, no retries
+        Serial.print("ok!");
+      } else {
+        Serial.print("nothing");
+      }
+    }
   }
 }
 
