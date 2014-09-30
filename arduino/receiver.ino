@@ -6,6 +6,8 @@
 
 #include <RFM69.h>
 #include <SPI.h>
+#include <Adafruit_NeoPixel.h>
+#include <LightEffects.h>
 
 #define NODEID        1    //unique for each node on same network
 #define NETWORKID     100  //the same on all nodes that talk to each other
@@ -23,14 +25,18 @@ void setup() {
   Serial.begin(SERIAL_BAUD);
   delay(10);
   radio.initialize(FREQUENCY,NODEID,NETWORKID);
-#ifdef IS_RFM69HW
-  radio.setHighPower(); //only for RFM69HW!
-#endif
   radio.encrypt(ENCRYPTKEY);
-  /*radio.promiscuous(false);*/
+  radio.promiscuous(false);
   char buff[50];
   sprintf(buff, "\nListening at %d Mhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
   Serial.println(buff);
+}
+
+void Blinker(byte pin, int delay_ms) {
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, HIGH);
+  delay(delay_ms);
+  digitalWrite(pin, LOW);
 }
 
 byte ackCount=0;
@@ -47,7 +53,7 @@ void loop() {
 
     ExchangeAck();
     Serial.println();
-    Blink(LED,3);
+    Blinker(LED,3);
   }
 }
 
@@ -76,10 +82,3 @@ void ExchangeAck() {
   }
 }
 
-void Blink(byte PIN, int DELAY_MS)
-{
-  pinMode(PIN, OUTPUT);
-  digitalWrite(PIN,HIGH);
-  delay(DELAY_MS);
-  digitalWrite(PIN,LOW);
-}
