@@ -10,24 +10,24 @@
 #define FUNC_SOLID_COLOUR           0x06
 #define FUNC_THROBBER               0x07
 
-void light_setup(Adafruit_NeoPixel);
+void light_setup(Adafruit_NeoPixel*);
 
-void runFunc(Adafruit_NeoPixel strip, volatile byte* input);
+void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input);
 
 // Fill the dots one after the other with a color
-void colorWipe(Adafruit_NeoPixel strip, uint32_t c, uint8_t wait);
+void colorWipe(Adafruit_NeoPixel *neopixel, uint32_t c, uint8_t wait);
 
-void rainbow(Adafruit_NeoPixel strip, uint8_t wait);
+void rainbow(Adafruit_NeoPixel *neopixel, uint8_t wait);
 
 // Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(Adafruit_NeoPixel strip, uint8_t wait);
+void rainbowCycle(Adafruit_NeoPixel *neopixel, uint8_t wait);
 
 //Theatre-style crawling lights.
-void theaterChase(Adafruit_NeoPixel strip, uint32_t c, uint8_t wait);
+void theaterChase(Adafruit_NeoPixel *neopixel, uint32_t c, uint8_t wait);
 
 //Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(Adafruit_NeoPixel strip, uint8_t wait);
+void theaterChaseRainbow(Adafruit_NeoPixel *neopixel, uint8_t wait);
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
-uint32_t Wheel(Adafruit_NeoPixel strip, byte WheelPos);
+uint32_t Wheel(Adafruit_NeoPixel *neopixel, byte WheelPos);
