@@ -5,7 +5,7 @@ void light_setup(Adafruit_NeoPixel strip) {
   strip.show(); // Initialize all pixels to 'off'
 }
 
-void runFunc(Adafruit_NeoPixel strip, char input[8]) {
+void runFunc(Adafruit_NeoPixel strip, volatile byte* input) {
   uint32_t colour = strip.Color(input[1], input[2], input[3]);
   uint8_t wait = (uint8_t) input[4];
   switch (input[0]) {
