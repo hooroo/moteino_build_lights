@@ -1,5 +1,7 @@
 #include <RFM69.h>
 #include <SPI.h>
+#include <Adafruit_NeoPixel.h>
+#include <LightEffects.h>
 
 #define NODEID        1    //unique for each node on same network
 #define NETWORKID     100  //the same on all nodes that talk to each other
@@ -12,7 +14,12 @@
 
 #define LED           9 // Moteinos have LEDs on D9
 
+#define NEO_PIN       6 // Arbitrary pin assignment.
+
 RFM69 radio;
+Adafruit_NeoPixel wheel(24, NEO_PIN, NEO_GRB + NEO_KHZ800);
+
+char receive_buffer[20];
 
 void setup() {
   Serial.begin(SERIAL_BAUD);
@@ -29,8 +36,16 @@ void loop() {
   if (radio.receiveDone())
   {
     Serial.print('[');Serial.print(radio.SENDERID, DEC);Serial.print("] ");
-    for (byte i = 0; i < radio.DATALEN; i++)
-      Serial.print((char)radio.DATA[i]);
+    for (byte i = 0; i < radio.DATALEN; i++) {
+      Serial.print((char)radio.DATA[i], HEX);
+      Serial.print(" ");
+    }
+    
+    if (radio.DATALEN == 5) {
+      Serial.println("running function...");
+      // runFunc(wheel, radio.DATA);
+    }
+
     // Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
     
     if (radio.ACKRequested())
