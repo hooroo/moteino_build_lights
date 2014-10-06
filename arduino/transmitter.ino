@@ -44,7 +44,7 @@ void setup() {
   sprintf(buff, "\nTransmitting at %d Mhz...", 433);
   Serial.println(buff);
   
-  payload[0] = FUNC_RAINBOW;
+  payload[0] = FUNC_RAINBOW_CYCLE;
   payload[1] = 0;
   payload[2] = 0;
   payload[3] = 0;

@@ -45,8 +45,8 @@ void loop() {
     
     if (radio.DATALEN == 5) {
       Serial.println("running function...");
-      // runFunc(&wheel, radio.DATA);
-      rainbowCycle(&wheel, 50);
+      runFunc(&wheel, radio.DATA);
+      // rainbowCycle(&wheel, 50);
     }
 
     // Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
