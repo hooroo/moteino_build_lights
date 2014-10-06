@@ -66,12 +66,41 @@ void loop() {
       Serial.println("ms\n");
     }
 
-    if (input == 'r') //d=dump register values
+    if (input == 'r') { //d=dump register values
       radio.readAllRegs();
+    }
+    else if (input == 'x') {
+      int currPeriod = millis()/TRANSMITPERIOD;
+      if (currPeriod != lastPeriod)
+      {
+        lastPeriod=currPeriod;
+        Serial.print("Sending[");
+        Serial.print(sendSize);
+        Serial.print("]: ");
+        for(byte i = 0; i < sendSize; i++) {
+          Serial.print((char)payload[i], HEX);
+          Serial.print(" ");
+        }
+
+        if (radio.sendWithRetry(GATEWAYID, payload, sendSize)) {
+          Serial.print(" ok!");
+        }
+        else {
+          Serial.print(" nothing...");
+        }
+        Serial.println();
+
+      }
+    }
+    
     //if (input == 'E') //E=enable encryption
     //  radio.encrypt(KEY);
     //if (input == 'e') //e=disable encryption
     //  radio.encrypt(null);
+  }
+  else {
+    Serial.println("...");
+    delay(1000);
   }
 
   //check for any received packets
@@ -79,7 +108,7 @@ void loop() {
   {
     Serial.print('[');Serial.print(radio.SENDERID, DEC);Serial.print("] ");
     for (byte i = 0; i < radio.DATALEN; i++)
-      Serial.print((char)radio.DATA[i]);
+    Serial.print((char)radio.DATA[i]);
     // Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
 
     if (radio.ACKRequested())
@@ -91,27 +120,7 @@ void loop() {
     Serial.println();
   }
 
-  int currPeriod = millis()/TRANSMITPERIOD;
-  if (currPeriod != lastPeriod)
-  {
-    lastPeriod=currPeriod;
-    Serial.print("Sending[");
-    Serial.print(sendSize);
-    Serial.print("]: ");
-    for(byte i = 0; i < sendSize; i++) {
-      Serial.print((char)payload[i], HEX);
-      Serial.print(" ");
-    }
-
-    if (radio.sendWithRetry(GATEWAYID, payload, sendSize)) {
-      Serial.print(" ok!");
-    }
-    else {
-      Serial.print(" nothing...");
-    }
-    Serial.println();
-    Blink(LED,3);
-  }
+  Blink(LED,3);
 }
 
 void Blink(byte PIN, int DELAY_MS)
