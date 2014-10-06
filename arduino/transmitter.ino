@@ -18,10 +18,21 @@
 
 #define SERIAL_BAUD   115200
 
+#define FUNC_COLORWIPE              0x01
+#define FUNC_RAINBOW                0x02
+#define FUNC_RAINBOW_CYCLE          0x03
+#define FUNC_THEATRE_CHASE          0x04
+#define FUNC_THEATRE_CHASE_RAINBOW  0x05
+#define FUNC_SOLID_COLOUR           0x06
+#define FUNC_THROBBER               0x07
+
 int TRANSMITPERIOD = 300; //transmit a packet to gateway so often (in ms)
-char payload[] = "123 ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+char payload[5];
+
+
 char buff[20];
-byte sendSize=0;
+byte sendSize=5;
 boolean requestACK = false;
 RFM69 radio;
 
@@ -33,6 +44,11 @@ void setup() {
   sprintf(buff, "\nTransmitting at %d Mhz...", 433);
   Serial.println(buff);
   
+  payload[0] = FUNC_RAINBOW;
+  payload[1] = 0;
+  payload[2] = 0;
+  payload[3] = 0;
+  payload[4] = 50;
 }
 
 long lastPeriod = -1;
@@ -83,7 +99,8 @@ void loop() {
     Serial.print(sendSize);
     Serial.print("]: ");
     for(byte i = 0; i < sendSize; i++) {
-      Serial.print((char)payload[i]);
+      Serial.print((char)payload[i], HEX);
+      Serial.print(" ");
     }
 
     if (radio.sendWithRetry(GATEWAYID, payload, sendSize)) {
@@ -92,8 +109,6 @@ void loop() {
     else {
       Serial.print(" nothing...");
     }
-
-    sendSize = (sendSize + 1) % 31;
     Serial.println();
     Blink(LED,3);
   }
