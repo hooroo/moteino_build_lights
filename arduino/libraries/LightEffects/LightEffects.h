@@ -2,6 +2,7 @@
 
 #define NEO_PIXEL_PIN 6
 
+#define FUNC_NOOP					0x00
 #define FUNC_COLORWIPE              0x01
 #define FUNC_RAINBOW                0x02
 #define FUNC_RAINBOW_CYCLE          0x03
