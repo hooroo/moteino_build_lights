@@ -52,16 +52,30 @@ void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input) {
 // }
 
 // Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(Adafruit_NeoPixel *neopixel, uint8_t wait) {
-  uint16_t i, j;
+// void rainbowCycle(Adafruit_NeoPixel *neopixel, uint8_t wait) {
+//   uint16_t iteration;
 
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(i=0; i< neopixel->numPixels(); i++) {
-      neopixel->setPixelColor(i, Wheel(neopixel, ((i * 256 / neopixel->numPixels()) + j) & 255));
+//   for(iteration=0; iteration<256*5; iteration++) { // 5 cycles of all colors on wheel
+//     _innerRainbowCycle(neopixel, iteration);
+//     delay(wait);
+//   }
+// }
+void _innerRainbowCycle(Adafruit_NeoPixel * neopixel);
+
+uint16_t iteration = 0;
+void rainbowCycle(Adafruit_NeoPixel* neopixel, uint8_t wait) {
+  if (iteration < 256*5) {
+    _innerRainbowCycle(neopixel);
+    iteration++;
+  }
+}
+
+void _innerRainbowCycle(Adafruit_NeoPixel * neopixel) {
+  uint16_t i;
+  for(i=0; i< neopixel->numPixels(); i++) {
+      neopixel->setPixelColor(i, Wheel(neopixel, ((i * 256 / neopixel->numPixels()) + iteration) & 255));
     }
     neopixel->show();
-    delay(wait);
-  }
 }
 
 // //Theatre-style crawling lights.

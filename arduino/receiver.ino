@@ -17,9 +17,10 @@
 #define NEO_PIN       6 // Arbitrary pin assignment.
 
 RFM69 radio;
-Adafruit_NeoPixel wheel = Adafruit_NeoPixel(60, NEO_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel wheel = Adafruit_NeoPixel(24, NEO_PIN, NEO_GRB + NEO_KHZ800);
 
-char receive_buffer[20];
+char receive_buffer[5];
+
 
 void setup() {
   Serial.begin(SERIAL_BAUD);
@@ -42,14 +43,15 @@ void loop() {
       Serial.print((char)radio.DATA[i], HEX);
       Serial.print(" ");
     }
-    
+
     if (radio.DATALEN == 5) {
       Serial.println("running function...");
-      runFunc(&wheel, radio.DATA);
+      for (int bit=0; bit < radio.DATALEN; bit++) {
+        receive_buffer[bit] = radio.DATA[bit];
+      }
       // rainbowCycle(&wheel, 50);
     }
 
-    // Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
     
     if (radio.ACKRequested())
     {
@@ -75,11 +77,16 @@ void loop() {
       }
     }
 
+    // Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
+    
+
     Serial.println();
   }
 
-  Blink(LED,3);
-  delay(1000);
+  runFunc(&wheel, receive_buffer);
+
+  Blink(LED, 3);
+  delay(50);
 }
 
 void Blink(byte PIN, int DELAY_MS)
