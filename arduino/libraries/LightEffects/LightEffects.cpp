@@ -15,9 +15,9 @@ void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input, bool reset) {
   uint32_t colour = neopixel->Color(input[1], input[2], input[3]);
   uint8_t wait = (uint8_t) input[4];
   switch (input[0]) {
-    // case FUNC_COLORWIPE:
-    //   colorWipe(strip, colour, wait);
-    //   break;
+    case FUNC_COLORWIPE:
+      colorWipe(strip, colour, wait);
+      break;
     // case FUNC_RAINBOW:
     //   rainbow(strip, wait);
     //   break;
@@ -36,14 +36,17 @@ void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input, bool reset) {
 }
 
 
-// // Fill the dots one after the other with a color
-// void colorWipe(Adafruit_NeoPixel *strip, uint32_t c, uint8_t wait) {
-//   for(uint16_t i=0; i<strip.numPixels(); i++) {
-//       strip.setPixelColor(i, c);
-//       strip.show();
-//       delay(wait);
-//   }
-// }
+// Fill the dots one after the other with a colour
+void colorWipe(Adafruit_NeoPixel *strip, uint32_t c, uint8_t wait) {
+  if(iteration < strip.numPixels()) {
+      strip.setPixelColor(iteration, c);
+      strip.show();
+      iteration++;
+  }
+  else {
+    iteration = 0;
+  }
+}
 
 // void rainbow(Adafruit_NeoPixel *strip, uint8_t wait) {
 //   uint16_t i, j;
