@@ -19,7 +19,7 @@
 RFM69 radio;
 Adafruit_NeoPixel wheel = Adafruit_NeoPixel(24, NEO_PIN, NEO_GRB + NEO_KHZ800);
 
-char receive_buffer[5];
+volatile byte receive_buffer[5];
 
 
 void setup() {
@@ -35,6 +35,7 @@ void setup() {
 
 byte ackCount=0;
 void loop() {
+  bool reset = false;
 
   if (radio.receiveDone())
   {
@@ -48,6 +49,7 @@ void loop() {
       Serial.println("running function...");
       for (int bit=0; bit < radio.DATALEN; bit++) {
         receive_buffer[bit] = radio.DATA[bit];
+        reset = true;
       }
       // rainbowCycle(&wheel, 50);
     }
@@ -83,7 +85,7 @@ void loop() {
     Serial.println();
   }
 
-  runFunc(&wheel, receive_buffer);
+  runFunc(&wheel, receive_buffer, reset);
 
   Blink(LED, 3);
   delay(50);

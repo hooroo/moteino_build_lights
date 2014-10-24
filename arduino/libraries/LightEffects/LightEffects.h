@@ -13,7 +13,7 @@
 
 void light_setup(Adafruit_NeoPixel*);
 
-void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input);
+void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input, bool reset);
 
 // Fill the dots one after the other with a color
 void colorWipe(Adafruit_NeoPixel *neopixel, uint32_t c, uint8_t wait);

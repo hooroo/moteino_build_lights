@@ -1,11 +1,17 @@
 #include "LightEffects.h"
 
+uint16_t iteration = 0;
+
 void light_setup(Adafruit_NeoPixel *neopixel) {
   neopixel->begin();
+  // neopixel->setBrightness(100);
   neopixel->show(); // Initialize all pixels to 'off'
 }
 
-void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input) {
+void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input, bool reset) {
+  if (reset) {
+    iteration = 0;
+  }
   uint32_t colour = neopixel->Color(input[1], input[2], input[3]);
   uint8_t wait = (uint8_t) input[4];
   switch (input[0]) {
@@ -60,15 +66,6 @@ void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input) {
 //     delay(wait);
 //   }
 // }
-void _innerRainbowCycle(Adafruit_NeoPixel * neopixel);
-
-uint16_t iteration = 0;
-void rainbowCycle(Adafruit_NeoPixel* neopixel, uint8_t wait) {
-  if (iteration < 256*5) {
-    _innerRainbowCycle(neopixel);
-    iteration++;
-  }
-}
 
 void _innerRainbowCycle(Adafruit_NeoPixel * neopixel) {
   uint16_t i;
@@ -76,6 +73,13 @@ void _innerRainbowCycle(Adafruit_NeoPixel * neopixel) {
       neopixel->setPixelColor(i, Wheel(neopixel, ((i * 256 / neopixel->numPixels()) + iteration) & 255));
     }
     neopixel->show();
+}
+
+void rainbowCycle(Adafruit_NeoPixel* neopixel, uint8_t wait) {
+  if (iteration < 256*5) {
+    _innerRainbowCycle(neopixel);
+    iteration++;
+  }
 }
 
 // //Theatre-style crawling lights.
