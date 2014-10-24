@@ -70,17 +70,13 @@ void colorWipe(Adafruit_NeoPixel *strip, uint32_t c, uint8_t wait) {
 //   }
 // }
 
-void _innerRainbowCycle(Adafruit_NeoPixel * neopixel) {
-  uint16_t i;
-  for(i=0; i< neopixel->numPixels(); i++) {
+void rainbowCycle(Adafruit_NeoPixel* neopixel, uint8_t wait) {
+  if (iteration < 256*5) {
+    uint16_t i;
+    for(i=0; i< neopixel->numPixels(); i++) {
       neopixel->setPixelColor(i, Wheel(neopixel, ((i * 256 / neopixel->numPixels()) + iteration) & 255));
     }
     neopixel->show();
-}
-
-void rainbowCycle(Adafruit_NeoPixel* neopixel, uint8_t wait) {
-  if (iteration < 256*5) {
-    _innerRainbowCycle(neopixel);
     iteration++;
   }
 }
