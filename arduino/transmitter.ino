@@ -45,8 +45,8 @@ void setup() {
   Serial.println(buff);
   
   payload[0] = FUNC_RAINBOW_CYCLE;
-  payload[1] = 0;
-  payload[2] = 0;
+  payload[1] = 128;
+  payload[2] = 128;
   payload[3] = 0;
   payload[4] = 50;
 }
@@ -73,6 +73,25 @@ void loop() {
       int currPeriod = millis()/TRANSMITPERIOD;
       if (currPeriod != lastPeriod)
       {
+        input = Serial.read();
+        payload[0] = input - 'a';
+
+        input = Serial.read();
+        if (input == 'r') {
+          payload[1] = 128; payload[2] = 0; payload[3] = 0;
+        }
+        else if (input == 'g') {
+          payload[1] = 0; payload[2] = 128; payload[3] = 0;
+        }
+        else if (input == 'b') {
+          payload[1] = 0; payload[2] = 0; payload[3] = 128;
+        }
+        else {
+         payload[1] = 128; payload[2] = 128; payload[3] = 0; 
+        }
+
+
+
         lastPeriod=currPeriod;
         Serial.print("Sending[");
         Serial.print(sendSize);

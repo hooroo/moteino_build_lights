@@ -14,7 +14,7 @@
 
 #define LED           9 // Moteinos have LEDs on D9
 
-#define NEO_PIN       6 // Arbitrary pin assignment.
+#define NEO_PIN       5 // Arbitrary pin assignment.
 
 RFM69 radio;
 Adafruit_NeoPixel wheel = Adafruit_NeoPixel(24, NEO_PIN, NEO_GRB + NEO_KHZ800);
@@ -88,7 +88,7 @@ void loop() {
   runFunc(&wheel, receive_buffer, reset);
 
   Blink(LED, 3);
-  delay(50);
+  delay(25);
 }
 
 void Blink(byte PIN, int DELAY_MS)
