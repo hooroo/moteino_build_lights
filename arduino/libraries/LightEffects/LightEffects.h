@@ -12,27 +12,26 @@
 #define FUNC_THROBBER               0x07 // h
 #define FUNC_BLANK					0x08 // i
 
-void light_setup(Adafruit_NeoPixel*);
 
-void runFunc(Adafruit_NeoPixel *neopixel, volatile byte* input, bool reset);
+typedef uint32_t Colour;
+typedef uint8_t Time;
 
-//Clears the pixels
-void blank(Adafruit_NeoPixel *neopixel);
+class Light {
+private:
+	Adafruit_NeoPixel* neopixel;
+	uint16_t iteration;
 
-// Fill the dots one after the other with a color
-void colorWipe(Adafruit_NeoPixel *neopixel, uint32_t c, uint8_t wait);
+	Colour colourWheel(byte);
 
-void rainbow(Adafruit_NeoPixel *neopixel, uint8_t wait);
+public:
+	Light(Adafruit_NeoPixel*);
 
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(Adafruit_NeoPixel *neopixel, uint8_t wait);
+	void runFunc(volatile byte*, bool);
 
-//Theatre-style crawling lights.
-void theaterChase(Adafruit_NeoPixel *neopixel, uint32_t c, uint8_t wait);
-
-//Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(Adafruit_NeoPixel *neopixel, uint8_t wait);
-
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel(Adafruit_NeoPixel *neopixel, byte WheelPos);
+	void blank();
+	void colorWipe(Colour, Time);
+	void rainbow(Time);
+	void rainbowCycle(Time);
+	void theaterChase(Colour, Time);
+	void theaterChaseRainbow(Time);
+};
