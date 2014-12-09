@@ -39,7 +39,6 @@ void Light::runFunc(volatile byte* input, bool reset) {
   }
 
   neopixel->show();
-  // delay(wait);
 }
 
 void Light::blank() {
@@ -56,17 +55,17 @@ void Light::colorWipe(Colour c, Time wait) {
   }
 }
 
-// void rainbow(Adafruit_NeoPixel *strip, uint8_t wait) {
-//   uint16_t i, j;
+void Light::rainbow(Time wait) {
+  uint16_t i;
 
-//   if(iteration < 256) {
-//     for(i=0; i<strip.numPixels(); i++) {
-//       strip.setPixelColor(i, colourWheel(strip, (i+iteration) & 255));
-//     }
-//     strip.show();
-//     iteration++;
-//   }
-// }
+  if(iteration < 256) {
+    for(i=0; i<neopixel->numPixels(); i++) {
+      neopixel->setPixelColor(i, colourWheel((i+iteration) & 255));
+    }
+    neopixel->show();
+    iteration++;
+  }
+}
 
 void Light::rainbowCycle(Time wait) {
   if (iteration < 256*5) {
@@ -104,18 +103,18 @@ void Light::theaterChase(Colour c, Time wait) {
 }
 
 // //Theatre-style crawling lights with rainbow effect
-// void theaterChaseRainbow(Adafruit_NeoPixel strip, uint8_t wait) {
+// void Light::theaterChaseRainbow(Time wait) {
 //   for (uint16_t j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
 //     for (uint16_t q=0; q < 3; q++) {
-//         for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-//           strip.setPixelColor(i+q, colourWheel(strip, (i+j) % 255));    //turn every third pixel on
+//         for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
+//           neopixel->setPixelColor(i+q, colourWheel((i+j) % 255));    //turn every third pixel on
 //         }
-//         strip.show();
+//         neopixel->show();
 
 //         delay(wait);
 
-//         for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-//           strip.setPixelColor(i+q, 0);        //turn every third pixel off
+//         for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
+//           neopixel->setPixelColor(i+q, 0);        //turn every third pixel off
 //         }
 //     }
 //   }
