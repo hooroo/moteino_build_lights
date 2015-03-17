@@ -2,7 +2,7 @@
 
 uint16_t iteration = 0;
 
-Light::Light(Adafruit_NeoPixel* pixel) : neopixel(pixel), iteration(0), chaseThird(0), chaseShow(true) {
+Light::Light(Adafruit_NeoPixel* pixel) : neopixel(pixel), iteration(0), chaseThird(0) {
   neopixel->begin();
   // neopixel->setBrightness(64);
   neopixel->show(); // Initialize all pixels to 'off'
@@ -31,9 +31,9 @@ void Light::runFunc(volatile byte* input, bool reset) {
     case FUNC_THEATRE_CHASE:
       theaterChase(colour, wait);
       break;
-    // case FUNC_THEATRE_CHASE_RAINBOW:
-    //   theaterChaseRainbow(neopixel, wait);
-    //   break;
+    case FUNC_THEATRE_CHASE_RAINBOW:
+      theaterChaseRainbow(wait);
+      break;
     default:
       break;
   }
@@ -51,69 +51,63 @@ void Light::blank() {
 void Light::colorWipe(Colour c, Time wait) {
   if(iteration < neopixel->numPixels()) {
     neopixel->setPixelColor(iteration, c);
-    iteration++;
+    iterate();
   }
 }
 
 void Light::rainbow(Time wait) {
   uint16_t i;
 
-  if(iteration < 256) {
-    for(i=0; i<neopixel->numPixels(); i++) {
-      neopixel->setPixelColor(i, colourWheel((i+iteration) & 255));
-    }
-    iteration++;
-  } else {
-    iteration = 0;
+  for(i=0; i<neopixel->numPixels(); i++) {
+    neopixel->setPixelColor(i, colourWheel((i+iteration) & 255));
   }
+  iterate();
 }
 
 void Light::rainbowCycle(Time wait) {
-  if (iteration < 256*5) {
-    uint16_t i;
-    for(i=0; i< neopixel->numPixels(); i++) {
-      neopixel->setPixelColor(i, colourWheel(((i * 256 / neopixel->numPixels()) + iteration) & 255));
-    }
-    iteration++;
-  } else {
-    iteration = 0;
+  uint16_t i;
+  for(i=0; i< neopixel->numPixels(); i++) {
+    neopixel->setPixelColor(i, colourWheel(((i * 256 / neopixel->numPixels()) + iteration) & 255));
   }
+
+  iterate();
 }
 
 //Theatre-style crawling lights.
 void Light::theaterChase(Colour c, Time wait) {
-
-  if (iteration < 10) {  //do 10 cycles of chasing
-    neopixel->clear();
-    for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
-      neopixel->setPixelColor(i+chaseThird, c);    //turn every third pixel on
-    }
-
-    ++chaseThird;
-    if (chaseThird >= 3) { chaseThird = 0; }
-    delay(wait);
-  } else {
-    iteration = 0;
+  uint16_t i;
+  neopixel->clear();
+  for (i=0; i < neopixel->numPixels(); i=i+3) {
+    neopixel->setPixelColor(i+chaseThird, c);    //turn every third pixel on
   }
+
+  chase();
+  delay(wait);
 }
 
 // //Theatre-style crawling lights with rainbow effect
-// void Light::theaterChaseRainbow(Time wait) {
-//   for (uint16_t j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-//     for (uint16_t q=0; q < 3; q++) {
-//         for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
-//           neopixel->setPixelColor(i+q, colourWheel((i+j) % 255));    //turn every third pixel on
-//         }
-//         neopixel->show();
+void Light::theaterChaseRainbow(Time wait) {
+  uint16_t i;
+  neopixel->clear();
+  for (i=0; i < neopixel->numPixels(); i=i+3) {
+    neopixel->setPixelColor(i+chaseThird, colourWheel((iteration) % 255));    //turn every third pixel on
+  }
+  neopixel->show();
 
-//         delay(wait);
+  chase();
+  iterate();
+  delay(wait);
+}
 
-//         for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
-//           neopixel->setPixelColor(i+q, 0);        //turn every third pixel off
-//         }
-//     }
-//   }
-// }
+void Light::chase(void) {
+  ++chaseThird;
+  if (chaseThird >= 3) { chaseThird = 0; }
+}
+
+void Light::iterate(void) {
+  ++iteration;
+  if (iteration >= 256) { iteration = 0; }
+}
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.

@@ -21,7 +21,10 @@ private:
 	Adafruit_NeoPixel* neopixel;
 	uint16_t iteration;
 	uint16_t chaseThird;
-	bool chaseShow;
+
+	void iterate(void);
+	void chase(void);
+
 
 	Colour colourWheel(byte);
 
