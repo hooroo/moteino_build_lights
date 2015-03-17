@@ -2,7 +2,7 @@
 
 uint16_t iteration = 0;
 
-Light::Light(Adafruit_NeoPixel* pixel) : neopixel(pixel), iteration(0) {
+Light::Light(Adafruit_NeoPixel* pixel) : neopixel(pixel), iteration(0), chaseThird(0), chaseShow(true) {
   neopixel->begin();
   // neopixel->setBrightness(64);
   neopixel->show(); // Initialize all pixels to 'off'
@@ -79,26 +79,25 @@ void Light::rainbowCycle(Time wait) {
 
 //Theatre-style crawling lights.
 void Light::theaterChase(Colour c, Time wait) {
-  static bool theaterChaseShow = true;
-  static bool _theatreChaseShow = false;
 
   if (iteration < 10) {  //do 10 cycles of chasing
-    for (uint16_t q=0; q < 3; q++) {
-      if (theaterChaseShow) {
-        for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
-          neopixel->setPixelColor(i+q, c);    //turn every third pixel on
-        }
-        neopixel->show();
+
+    if (chaseShow) {
+      for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
+        neopixel->setPixelColor(i+chaseThird, c);    //turn every third pixel on
       }
-      else {
-        for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
-          neopixel->setPixelColor(i+q, 1);        //turn every third pixel off
-        }
-      }
+      neopixel->show();
+    }
+    else {
+      neopixel->clear();
+      neopixel->show();
     }
     
-    theaterChaseShow = _theatreChaseShow;
-    _theatreChaseShow = !theaterChaseShow;
+
+    ++chaseThird;
+    if (chaseThird >= 3) { chaseThird = 0; }
+    bool _show = !chaseShow;
+    chaseShow = _show;
   }
 }
 

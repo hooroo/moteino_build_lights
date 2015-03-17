@@ -20,6 +20,8 @@ class Light {
 private:
 	Adafruit_NeoPixel* neopixel;
 	uint16_t iteration;
+	uint16_t chaseThird;
+	bool chaseShow;
 
 	Colour colourWheel(byte);
 

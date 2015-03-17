@@ -18,7 +18,7 @@
 
 RFM69 radio;
 Adafruit_NeoPixel wheel = Adafruit_NeoPixel(24, NEO_PIN, NEO_GRB + NEO_KHZ800);
-Light light(&wheel);
+Light* light = NULL;
 
 volatile byte receive_buffer[5];
 
@@ -26,6 +26,7 @@ volatile byte receive_buffer[5];
 void setup() {
   Serial.begin(SERIAL_BAUD);
   delay(10);
+  light = new Light(&wheel);
   radio.initialize(FREQUENCY,NODEID,NETWORKID);
   radio.encrypt(ENCRYPTKEY);
   char buff[50];
@@ -85,7 +86,7 @@ void loop() {
     Serial.println();
   }
 
-  light.runFunc(receive_buffer, reset);
+  light->runFunc(receive_buffer, reset);
   Serial.println("function ran");
 
   Blink(LED, 3);
