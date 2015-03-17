@@ -81,23 +81,16 @@ void Light::rainbowCycle(Time wait) {
 void Light::theaterChase(Colour c, Time wait) {
 
   if (iteration < 10) {  //do 10 cycles of chasing
-
-    if (chaseShow) {
-      for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
-        neopixel->setPixelColor(i+chaseThird, c);    //turn every third pixel on
-      }
-      neopixel->show();
+    neopixel->clear();
+    for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
+      neopixel->setPixelColor(i+chaseThird, c);    //turn every third pixel on
     }
-    else {
-      neopixel->clear();
-      neopixel->show();
-    }
+    neopixel->show();
     
 
     ++chaseThird;
     if (chaseThird >= 3) { chaseThird = 0; }
-    bool _show = !chaseShow;
-    chaseShow = _show;
+    delay(wait);
   }
 }
 
