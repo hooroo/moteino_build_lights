@@ -22,9 +22,9 @@ void Light::runFunc(volatile byte* input, bool reset) {
     case FUNC_COLORWIPE:
       colorWipe(colour, wait);
       break;
-    // case FUNC_RAINBOW:
-    //   rainbow(neopixel, wait);
-    //   break;
+    case FUNC_RAINBOW:
+      rainbow(wait);
+      break;
     case FUNC_RAINBOW_CYCLE:
       rainbowCycle(wait);
       break;
@@ -62,8 +62,9 @@ void Light::rainbow(Time wait) {
     for(i=0; i<neopixel->numPixels(); i++) {
       neopixel->setPixelColor(i, colourWheel((i+iteration) & 255));
     }
-    neopixel->show();
     iteration++;
+  } else {
+    iteration = 0;
   }
 }
 
@@ -74,6 +75,8 @@ void Light::rainbowCycle(Time wait) {
       neopixel->setPixelColor(i, colourWheel(((i * 256 / neopixel->numPixels()) + iteration) & 255));
     }
     iteration++;
+  } else {
+    iteration = 0;
   }
 }
 
@@ -85,12 +88,12 @@ void Light::theaterChase(Colour c, Time wait) {
     for (uint16_t i=0; i < neopixel->numPixels(); i=i+3) {
       neopixel->setPixelColor(i+chaseThird, c);    //turn every third pixel on
     }
-    neopixel->show();
-    
 
     ++chaseThird;
     if (chaseThird >= 3) { chaseThird = 0; }
     delay(wait);
+  } else {
+    iteration = 0;
   }
 }
 
