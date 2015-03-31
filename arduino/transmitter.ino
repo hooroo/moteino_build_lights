@@ -34,18 +34,19 @@ char payload[5];
 
 
 char buff[20];
-byte sendSize=5;
+byte sendSize = 5;
 boolean requestACK = false;
 RFM69 radio;
 
-void setup() {
+void setup()
+{
   Serial.begin(SERIAL_BAUD);
-  radio.initialize(FREQUENCY,NODEID,NETWORKID);
+  radio.initialize(FREQUENCY, NODEID, NETWORKID);
   radio.encrypt(ENCRYPTKEY);
   char buff[50];
   sprintf(buff, "\nTransmitting at %d Mhz...", 433);
   Serial.println(buff);
-  
+
   payload[0] = FUNC_RAINBOW_CYCLE;
   payload[1] = 128;
   payload[2] = 128;
@@ -54,144 +55,191 @@ void setup() {
 }
 
 long lastPeriod = -1;
-void loop() {
+void loop()
+{
   //process any serial input
   if (Serial.available() > 0)
   {
     char input = Serial.read();
-    // if (input >= 48 && input <= 57) //[0,9]
-    // {
-    //   TRANSMITPERIOD = 100 * (input-48);
-    //   if (TRANSMITPERIOD == 0) TRANSMITPERIOD = 1000;
-    //   Serial.print("\nChanging delay to ");
-    //   Serial.print(TRANSMITPERIOD);
-    //   Serial.println("ms\n");
-    // }
 
-    // if (input == 'r') { //d=dump register values
-    //   radio.readAllRegs();
-    // }
-    // else 
-    if (input == 'x') {
+    if (input == 'x')
+    {
       recipient = RECIPIENT;
-      int currPeriod = millis()/TRANSMITPERIOD;
+      int currPeriod = millis() / TRANSMITPERIOD;
       if (currPeriod != lastPeriod)
       {
         input = Serial.read();
         payload[0] = input - 'a';
 
         input = Serial.read();
-        if (input == 'r') {
-          payload[1] = 128; payload[2] = 0; payload[3] = 0;
+        if (input == 'r')
+        {
+          payload[1] = 128;
+          payload[2] = 0;
+          payload[3] = 0;
         }
-        else if (input == 'g') {
-          payload[1] = 0; payload[2] = 128; payload[3] = 0;
+        else if (input == 'g')
+        {
+          payload[1] = 0;
+          payload[2] = 128;
+          payload[3] = 0;
         }
-        else if (input == 'b') {
-          payload[1] = 0; payload[2] = 0; payload[3] = 128;
+        else if (input == 'b')
+        {
+          payload[1] = 0;
+          payload[2] = 0;
+          payload[3] = 128;
         }
-        else {
-         payload[1] = 128; payload[2] = 128; payload[3] = 0; 
-        }
-
-
-
-        lastPeriod=currPeriod;
-        Serial.print("Sending[");
-        Serial.print(sendSize);
-        Serial.print("]: ");
-        for(byte i = 0; i < sendSize; i++) {
-          Serial.print((char)payload[i], HEX);
-          Serial.print(" ");
+        else
+        {
+          payload[1] = 128;
+          payload[2] = 128;
+          payload[3] = 0;
         }
 
-        if (radio.sendWithRetry(recipient, payload, sendSize)) {
-          Serial.print(" ok!");
-        }
-        else {
-          Serial.print(" nothing...");
-        }
-        Serial.println();
+        lastPeriod = currPeriod;
+        send(recipient, payload);
 
-      }
-      else if (input == 's') {
-        recipient = 0;
-        byte numstr[3];
-        int currPeriod = millis()/TRANSMITPERIOD;
-        if (currPeriod != lastPeriod) {
-          numstr[0] = Serial.read();
-          numstr[1] = Serial.read();
-          recipient = parseHexStr(numstr);
-          
-          payload[0] = Serial.read() - 'a';
-
-          numstr[0] = Serial.read();
-          numstr[1] = Serial.read();
-          payload[1] = parseHexStr(numstr);
-
-          numstr[0] = Serial.read();
-          numstr[1] = Serial.read();
-          payload[2] = parseHexStr(numstr);
-
-          numstr[0] = Serial.read();
-          numstr[1] = Serial.read();
-          payload[3] = parseHexStr(numstr);
-
-          //TODO: time string
-
-          // if (Serial.available() > 0) {
-          //   uint8_t time = 0;
-          //   input = Serial.read();
-          //   if (input == 't') {
-          //     while (Serial.available() > 0) {
-          //       time *= 10;
-          //       time += parseDecDigit(Serial.read());
-          //     }
-          //   }
-          // }
-          // else {
-          payload[4] = 50;
-          // }
-                     
-        }
       }
     }
-    
-    //if (input == 'E') //E=enable encryption
-    //  radio.encrypt(KEY);
-    //if (input == 'e') //e=disable encryption
-    //  radio.encrypt(null);
+    else if (input == 's')
+    {
+      recipient = 0;
+      int currPeriod = millis() / TRANSMITPERIOD;
+      if (currPeriod != lastPeriod)
+      {
+        readRecipient();
+
+        payload[0] = Serial.read() - 'a';
+
+        if (Serial.available() > 0)
+        {
+          readColour();
+          readTiming();
+        }
+        else {
+          payload[1] = 0x7F;
+          payload[2] = 0x7F;
+          payload[3] = 0x7F;
+          payload[4] = 0x50;
+        }
+
+        send(recipient, payload);
+
+      }
+    }
   }
-  else {
+  else
+  {
     Serial.println("...");
     delay(1000);
   }
 
-  //check for any received packets
+//check for any received packets
   if (radio.receiveDone())
   {
-    Serial.print('[');Serial.print(radio.SENDERID, DEC);Serial.print("] ");
+    Serial.print('[');
+    Serial.print(radio.SENDERID, DEC);
+    Serial.print("] ");
     for (byte i = 0; i < radio.DATALEN; i++)
-    Serial.print((char)radio.DATA[i]);
-    // Serial.print("   [RX_RSSI:");Serial.print(radio.RSSI);Serial.print("]");
+      Serial.print((char)radio.DATA[i]);
 
     if (radio.ACKRequested())
     {
       radio.sendACK();
       Serial.print(" - ACK sent");
     }
-    Blink(LED,5);
+    Blink(LED, 5);
     Serial.println();
   }
 
-  Blink(LED,3);
+  Blink(LED, 3);
 }
 
-uint8_t parseHexDigit(byte hex) {
+void send(uint8_t recipient, char payload[5])
+{
+  Serial.print("Sending[");
+  Serial.print(sendSize);
+  Serial.print("]: ");
+  for(byte i = 0; i < sendSize; i++)
+  {
+    Serial.print((char)payload[i], HEX);
+    Serial.print(" ");
+  }
+  if (radio.sendWithRetry(recipient, payload, sendSize))
+  {
+    Serial.print(" ok!");
+  }
+  else
+  {
+    Serial.print(" nothing...");
+  }
+  Serial.println();
+}
+
+void readRecipient()
+{
+  byte numstr[2];
+  
+  numstr[0] = Serial.read();
+  numstr[1] = Serial.read();
+  recipient = parseHexStr(numstr);
+}
+
+void readColour()
+{
+  byte numstr[2];
+  if (Serial.read() == '#')
+  {
+    numstr[0] = Serial.read();
+    numstr[1] = Serial.read();
+    payload[1] = parseHexStr(numstr);
+
+
+    numstr[0] = Serial.read();
+    numstr[1] = Serial.read();
+    payload[2] = parseHexStr(numstr);
+
+    numstr[0] = Serial.read();
+    numstr[1] = Serial.read();
+    payload[3] = parseHexStr(numstr);
+  }
+  else
+  {
+    payload[1] = 0x00;
+    payload[2] = 0x00;
+    payload[3] = 0x00;
+  }
+}
+
+void readTiming()
+{
+  uint8_t time = 0;
+
+  if (Serial.read() == 't')
+  {
+    while (Serial.available() > 0)
+    {
+      time *= 10;
+      time += parseDecDigit(Serial.read());
+    }
+
+    payload[4] = time;
+  }
+  else
+  {
+    payload[4] = 50;
+  }
+}
+
+uint8_t parseHexDigit(byte hex)
+{
   hex -= '0'; // ASCII offset of '0' from 0x0
-  if (hex > 9) {
+  if (hex > 9)
+  {
     hex -= ('A' - '0'); // ASCII offset of 'A' from '0'
-    if (hex > 5) {
+    if (hex > 5)
+    {
       hex -= ('a' - 'A'); //ASCII offset of 'a' from 'A'
     }
     hex += 0xA;
@@ -200,13 +248,16 @@ uint8_t parseHexDigit(byte hex) {
   return (uint8_t) hex;
 }
 
-uint8_t parseHexStr(byte hexstr[2]) {
+uint8_t parseHexStr(byte hexstr[2])
+{
   return (parseHexDigit(hexstr[0]) << 4) + parseHexDigit(hexstr[1]);
 }
 
-uint8_t parseDecDigit(byte digit) {
+uint8_t parseDecDigit(byte digit)
+{
   digit -= 0x30;
-  if (digit > 9) {
+  if (digit > 9)
+  {
     digit = 9; // Clamp anything higher than 9
   }
 
@@ -216,7 +267,7 @@ uint8_t parseDecDigit(byte digit) {
 void Blink(byte PIN, int DELAY_MS)
 {
   pinMode(PIN, OUTPUT);
-  digitalWrite(PIN,HIGH);
+  digitalWrite(PIN, HIGH);
   delay(DELAY_MS);
-  digitalWrite(PIN,LOW);
+  digitalWrite(PIN, LOW);
 }
