@@ -189,8 +189,9 @@ void readRecipient()
 void readColour()
 {
   byte numstr[2];
-  if (Serial.read() == '#')
+  if (Serial.peek() == '#')
   {
+    Serial.read();
     numstr[0] = Serial.read();
     numstr[1] = Serial.read();
     payload[1] = parseHexStr(numstr);
@@ -216,8 +217,9 @@ void readTiming()
 {
   uint8_t time = 0;
 
-  if (Serial.read() == 't')
+  if (Serial.peek() == 't')
   {
+    Serial.read();
     while (Serial.available() > 0)
     {
       time *= 10;
