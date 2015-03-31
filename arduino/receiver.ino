@@ -25,7 +25,6 @@ volatile byte receive_buffer[5];
 
 void setup() {
   Serial.begin(SERIAL_BAUD);
-  delay(10);
   light = new Light(&wheel);
   radio.initialize(FREQUENCY,NODEID,NETWORKID);
   radio.encrypt(ENCRYPTKEY);
@@ -89,8 +88,10 @@ void loop() {
   light->runFunc(receive_buffer, reset);
   Serial.println("function ran");
 
+  Time wait = receive_buffer[4];
+
   Blink(LED, 3);
-  delay(25);
+  delay(wait);
 }
 
 void Blink(byte PIN, int DELAY_MS)
