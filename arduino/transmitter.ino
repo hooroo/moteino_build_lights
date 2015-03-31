@@ -8,7 +8,7 @@
 
 #define NODEID        2    //unique for each node on same network
 #define NETWORKID     100  //the same on all nodes that talk to each other
-#define GATEWAYID     1
+#define RECIPIENT     1
 //Match frequency to the hardware version of the radio on your Moteino (uncomment one):
 #define FREQUENCY   RF69_433MHZ
 #define ENCRYPTKEY    "sampleEncryptKey" //exactly the same 16 characters/bytes on all nodes!
@@ -27,6 +27,8 @@
 #define FUNC_THROBBER               0x07
 
 int TRANSMITPERIOD = 300; //transmit a packet to gateway so often (in ms)
+
+uint8_t recipient = 0;
 
 char payload[5];
 
@@ -57,19 +59,21 @@ void loop() {
   if (Serial.available() > 0)
   {
     char input = Serial.read();
-    if (input >= 48 && input <= 57) //[0,9]
-    {
-      TRANSMITPERIOD = 100 * (input-48);
-      if (TRANSMITPERIOD == 0) TRANSMITPERIOD = 1000;
-      Serial.print("\nChanging delay to ");
-      Serial.print(TRANSMITPERIOD);
-      Serial.println("ms\n");
-    }
+    // if (input >= 48 && input <= 57) //[0,9]
+    // {
+    //   TRANSMITPERIOD = 100 * (input-48);
+    //   if (TRANSMITPERIOD == 0) TRANSMITPERIOD = 1000;
+    //   Serial.print("\nChanging delay to ");
+    //   Serial.print(TRANSMITPERIOD);
+    //   Serial.println("ms\n");
+    // }
 
-    if (input == 'r') { //d=dump register values
-      radio.readAllRegs();
-    }
-    else if (input == 'x') {
+    // if (input == 'r') { //d=dump register values
+    //   radio.readAllRegs();
+    // }
+    // else 
+    if (input == 'x') {
+      recipient = RECIPIENT;
       int currPeriod = millis()/TRANSMITPERIOD;
       if (currPeriod != lastPeriod)
       {
@@ -101,7 +105,7 @@ void loop() {
           Serial.print(" ");
         }
 
-        if (radio.sendWithRetry(GATEWAYID, payload, sendSize)) {
+        if (radio.sendWithRetry(recipient, payload, sendSize)) {
           Serial.print(" ok!");
         }
         else {
@@ -109,6 +113,47 @@ void loop() {
         }
         Serial.println();
 
+      }
+      else if (input == 's') {
+        recipient = 0;
+        byte numstr[3];
+        int currPeriod = millis()/TRANSMITPERIOD;
+        if (currPeriod != lastPeriod) {
+          numstr[0] = Serial.read();
+          numstr[1] = Serial.read();
+          recipient = parseHexStr(numstr);
+          
+          payload[0] = Serial.read() - 'a';
+
+          numstr[0] = Serial.read();
+          numstr[1] = Serial.read();
+          payload[1] = parseHexStr(numstr);
+
+          numstr[0] = Serial.read();
+          numstr[1] = Serial.read();
+          payload[2] = parseHexStr(numstr);
+
+          numstr[0] = Serial.read();
+          numstr[1] = Serial.read();
+          payload[3] = parseHexStr(numstr);
+
+          //TODO: time string
+
+          // if (Serial.available() > 0) {
+          //   uint8_t time = 0;
+          //   input = Serial.read();
+          //   if (input == 't') {
+          //     while (Serial.available() > 0) {
+          //       time *= 10;
+          //       time += parseDecDigit(Serial.read());
+          //     }
+          //   }
+          // }
+          // else {
+          payload[4] = 50;
+          // }
+                     
+        }
       }
     }
     
@@ -140,6 +185,32 @@ void loop() {
   }
 
   Blink(LED,3);
+}
+
+uint8_t parseHexDigit(byte hex) {
+  hex -= '0'; // ASCII offset of '0' from 0x0
+  if (hex > 9) {
+    hex -= ('A' - '0'); // ASCII offset of 'A' from '0'
+    if (hex > 5) {
+      hex -= ('a' - 'A'); //ASCII offset of 'a' from 'A'
+    }
+    hex += 0xA;
+  }
+
+  return (uint8_t) hex;
+}
+
+uint8_t parseHexStr(byte hexstr[2]) {
+  return (parseHexDigit(hexstr[0]) << 4) + parseHexDigit(hexstr[1]);
+}
+
+uint8_t parseDecDigit(byte digit) {
+  digit -= 0x30;
+  if (digit > 9) {
+    digit = 9; // Clamp anything higher than 9
+  }
+
+  return (uint8_t) digit;
 }
 
 void Blink(byte PIN, int DELAY_MS)
